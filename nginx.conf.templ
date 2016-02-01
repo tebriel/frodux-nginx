@@ -38,31 +38,22 @@ http {
 	gzip on;
 	gzip_disable "msie6";
 
-    server {
-            listen 80;
-
-            location / {
-                proxy_pass http://10.77.2.12:8500/;
-                proxy_set_header Host $host;
-            }
-
-            index index.html;
-
-            server_name consul.frodux.in;
-    }
-
     {{range services}}{{if .Tags | contains "http" }}{{range service .Name}}
     server {
-            listen 80;
+        {{if .Tags | contains "internal"}}
+        listen 8888;
+        {{else}}
+        listen 80;
+        {{end}}
 
-            location / {
-                proxy_pass http://{{.Address}}:{{.Port}}/;
-                proxy_set_header Host $host;
-            }
+        location / {
+            proxy_pass http://{{.Address}}:{{.Port}}/;
+            proxy_set_header Host $host;
+        }
 
-            index index.html;
+        index index.html;
 
-            server_name {{.Name}}.frodux.in;
+        server_name {{.Name}}.frodux.in;
     }
-            {{end}}{{end}}{{end}}
+    {{end}}{{end}}{{end}}
 }
