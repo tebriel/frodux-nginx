@@ -45,6 +45,17 @@ http {
         {{else}}
         listen 80;
         {{end}}
+        {{if eq .Name "ghost"}}
+        location /nginx_status {
+            stub_status on;
+            # I do not need logs for stats
+            access_log   off;
+            # Security: Only allow access from 192.168.1.100 IP #
+            allow 52.23.55.98;
+            # Send rest of the world to /dev/null #
+            deny all;
+        }
+        {{end}}
 
         location / {
             proxy_pass http://{{.Address}}:{{.Port}}/;
